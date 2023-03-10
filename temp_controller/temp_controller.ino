@@ -1,37 +1,17 @@
 #include "DS18B20.h"
 #include <SPI.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include "SSD1306Ascii.h"
+#include "SSD1306AsciiAvrI2c.h"
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 32 // OLED display height, in pixels
 #define SENSPIN     (2)
 #define RELAY_PIN   (3)
 #define TARGET_TEMP (10)
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
-// The pins for I2C are defined by the Wire-library. 
-// On an arduino UNO:       A4(SDA), A5(SCL)
-// On an arduino MEGA 2560: 20(SDA), 21(SCL)
-// On an arduino LEONARDO:   2(SDA),  3(SCL), ...
-#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-
-void display_current_temp(float temperature){
-  
-  display.clearDisplay();
-
-  display.setTextSize(1);      // Normal 1:1 pixel scale
-  display.setTextColor(SSD1306_WHITE); // Draw white text
-  display.setCursor(0, 0);     // Start at top-left corner
-  display.cp437(true);         // Use full 256 char 'Code Page 437' font
-
-  display.write(temperature);
- 
-  display.display();  
-}
+// 0X3C+SA0 - 0x3C or 0x3D
+#define I2C_ADDRESS 0x3C
+// Define proper RST_PIN if required.
+#define RST_PIN -1
+SSD1306AsciiAvrI2c oled;
 
 void updateCurrentTemperature(void){
     
@@ -45,24 +25,33 @@ void updateCurrentTemperature(void){
     digitalWrite(RELAY_PIN, LOW); 
   }
 
-  display_current_temp(currentTemp);
+  oled.clear(); 
+  oled.println(currentTemp);
 
 }
+
 
 void setup() {
   digitalWrite(RELAY_PIN, LOW); 
   pinMode(RELAY_PIN, OUTPUT);
   Serial.begin(9600); 
 
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
-  }
-  
+#if RST_PIN >= 0
+  oled.begin(&Adafruit128x32, I2C_ADDRESS, RST_PIN);
+#else // RST_PIN >= 0
+  oled.begin(&Adafruit128x32, I2C_ADDRESS);
+#endif // RST_PIN >= 0
+  // Call oled.setI2cClock(frequency) to change from the default frequency.
+  oled.setFont(fixednums15x31);  
 }
 
 void loop() {
-  updateCurrentTemperature();
+  // updateCurrentTemperature();
+  for(int i = 0; i < 10; i++){
+    oled.clear(); 
+    oled.print(i);
+    oled.print(" WHITE");
+    delay(1000);
+  }
   delay(2000);
 }
