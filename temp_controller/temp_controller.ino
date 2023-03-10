@@ -1,9 +1,10 @@
 #include "DS18B20.h"
 #include "lcdgfx.h"
 
-#define SENSPIN     (2)
-#define RELAY_PIN   (3)
-#define TARGET_TEMP (10)
+#define SENSPIN        (2)
+#define RELAY_PIN      (3)
+#define TARGET_TEMP_W  (10)
+#define TARGET_TEMP_R  (15)
 
 DisplaySSD1306_128x32_I2C display(-1);
 
@@ -11,7 +12,7 @@ void updateCurrentTemperature(void){
     
   float currentTemp = ((float)DS_readTemp(SENSPIN))/16; 
  
-  if(currentTemp < TARGET_TEMP){
+  if(currentTemp < TARGET_TEMP_W){
     /* Activate */ 
     digitalWrite(RELAY_PIN, HIGH); 
   }else{
