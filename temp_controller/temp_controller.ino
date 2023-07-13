@@ -1,12 +1,12 @@
 #include "DS18B20.h"
 #include "lcdgfx.h"
 
-#define SENSPIN         (2)
-#define RELAY_PIN       (3)
-#define BTN_PIN         (4)
+#define SENSPIN         (PD2)
+#define RELAY_PIN       (PD3)
+#define BTN_PIN         (PD5)
 #define LED_PIN         (13)
-#define TARGET_TEMP_W   (10)
-#define TARGET_TEMP_R   (15)
+#define TARGET_TEMP_W   (8)
+#define TARGET_TEMP_R   (13)
 
 #define ROW_1_Y         (0)
 #define ROW_2_Y         (24)
@@ -26,6 +26,7 @@ void updateDisplay(void){
   if(change_flag){
     display.setFixedFont( comic_sans_font24x32_123 );    
     display.clear(); 
+
     itoa(display_temp, cstr, 10);
     display.printFixed(0,  ROW_1_Y, cstr, STYLE_BOLD);    
 
@@ -41,14 +42,15 @@ void updateDisplay(void){
     distance = strlen(cstr) * 6;
     display.printFixed(90 + distance + 4,  ROW_2_Y - 4, "o", STYLE_NORMAL);
     display.printFixed(90 + distance + 10,  ROW_2_Y, "C", STYLE_NORMAL);
+    change_flag = false;
   }
 }
 
 void updateCurrentTemperature(void){
     
-  float currentTemp = ((float)DS_readTemp(SENSPIN))/16; 
+  float currentTemp = ((float)DS_readTemp(SENSPIN))/16;      
  
-  if(currentTemp < TARGET_TEMP_W){
+  if(currentTemp < target_temp){
     /* Activate */ 
     digitalWrite(RELAY_PIN, HIGH); 
     digitalWrite(LED_PIN, LOW); 
@@ -60,7 +62,9 @@ void updateCurrentTemperature(void){
 
   int new_temp = int(currentTemp + 0.5);
   if(new_temp != display_temp){
-    change_flag = true;
+    change_flag = true;   
+    display_temp = new_temp;
+    Serial.println(currentTemp);
   }
 }
 
@@ -90,7 +94,7 @@ void setup() {
   digitalWrite(LED_PIN, HIGH); 
   pinMode(LED_PIN, OUTPUT);
   pinMode(BTN_PIN, INPUT_PULLUP);
-  Serial.begin(9600); 
+  Serial.begin(115200); 
 
   /* Select the font to use with menu and all font functions */
   display.setFixedFont( comic_sans_font24x32_123 );
