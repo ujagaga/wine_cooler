@@ -9,4 +9,3 @@ I am using a 3D printer to build bottle seat on the metal shelf holders.
 
 A CPU heatpipe cooler is to cool down Peltier module and an aluminium tin plate cools the inside of the box.
 
-NOTE: This work is still in progress.  
