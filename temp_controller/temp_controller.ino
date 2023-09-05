@@ -48,23 +48,26 @@ void updateDisplay(void){
 
 void updateCurrentTemperature(void){
     
-  float currentTemp = ((float)DS_readTemp(SENSPIN))/16;      
+  float currentTemp = ((float)DS_readTemp(SENSPIN))/16;  
  
-  if(currentTemp < target_temp){
+  if(currentTemp > target_temp){
     /* Activate */ 
     digitalWrite(RELAY_PIN, HIGH); 
     digitalWrite(LED_PIN, LOW); 
   }else{
     /* Deactivate */ 
     digitalWrite(RELAY_PIN, LOW); 
-    digitalWrite(LED_PIN, HIGH); 
+    digitalWrite(LED_PIN, HIGH);     
   }
 
   int new_temp = int(currentTemp + 0.5);
   if(new_temp != display_temp){
     change_flag = true;   
     display_temp = new_temp;
-    Serial.println(currentTemp);
+    Serial.print("Current:");
+    Serial.print(currentTemp);
+    Serial.print("; Target:");
+    Serial.println(target_temp);
   }
 }
 
